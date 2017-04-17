@@ -29,9 +29,11 @@ $debug['response'] = $response;
 // writeToDebugLog(__LINE__,__FUNCTION__,__FILE__,array('Debug' => $debug), false);
 //
 class AMDebug {
-    private $logFile = '/tmp/am_php_debugLog.log';
-    private $fileNameShortnerString = '/var/www/';
-    private $depthBeforeMaxDepth = 5;
+
+    const logFile = '/code/php/log/am_php_debugLog.log';
+    const fileNameShort = '/var/www/';
+    const depthBeforeMaxDepth = 5;
+
     public static function writeToDebugLog($line,$function,$file, $otherData, $newfile = false, $limitBacktraceLineCount = 3) {
 
         $flag = FILE_APPEND;
@@ -39,7 +41,7 @@ class AMDebug {
         if ($newfile) {
             $flag = null;
         }
-        $file = self::fileNameShortner($file);
+        $file = self::fileNameShortnerString($file);
         $backtrace = debug_backtrace();
         // $backtrace = "";
         $myOut .= <<<OUT
@@ -56,14 +58,14 @@ OUT;
                 break;
             }
 
-            $filename = self::fileNameShortner($backInfo['file']);
-            $debug .= "\t at {$backIndex} " . self::fileNameShortner($filename) . " (line {$backInfo['line']})"
+            $filename = self::fileNameShortnerString($backInfo['file']);
+            $debug .= "\t at {$backIndex} " . self::fileNameShortnerString($filename) . " (line {$backInfo['line']})"
                 . " -> {$backInfo['function']}{$nl}";
     ;
     //           . "  -> {$backInfo['function']}(" . join(",",$backInfo['args']) . "){$nl}";
         }
         file_put_contents(
-            $this->logFile,
+            self::logFile,
             $myOut . "\n" . "======" . "\n"
             . $debug . "\n" . "=======" . "\n"
             . self::walkArray($otherData, 0) . "\n"
@@ -72,15 +74,15 @@ OUT;
     }
 
 
-    private static function fileNameShortner($filename) {
-        if( ($x_pos = strpos($filename, $this->fileNameShortnerString)) !== FALSE ) {
-            $filename = substr($filename, $x_pos + strlen($this->fileNameShortnerString) );
+    private static function fileNameShortnerString($filename) {
+        if( ($x_pos = strpos($filename, self::fileNameShort)) !== FALSE ) {
+            $filename = substr($filename, $x_pos + strlen(self::fileNameShort) );
         }
         return $filename;
     }
 
     private static function walkArray($data, $depth) {
-        if ($depth > $this->depthBeforeMaxDepth) return 'Max Depth Reached';
+        if ($depth > self::depthBeforeMaxDepth) return 'Max Depth Reached';
         switch (gettype($data)) {
             case 'object':
                 if ($data instanceof DateTime) {
